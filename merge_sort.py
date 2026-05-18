@@ -1,54 +1,49 @@
-import random
+import time
 
-random.seed("ABC")
-numbers = [random.randint(0, 1000) for _ in range(100)]
+def merge_sort(arr):
+    if len(arr) > 1:
+        left_arr = arr[:len(arr)//2]
+        right_arr = arr[len(arr)//2:]
 
-def merge_sort(numbers_list, left, right):
+        # recursion
+        merge_sort(left_arr)
+        merge_sort(right_arr)
 
-    #base case
-    if left >= right:
-        return
+        # merge
+        i = 0
+        j = 0
+        k = 0
 
-    mid = (left + right) // 2
+        while i < len(left_arr) and j < len(right_arr):
+            if left_arr[i] < right_arr[j]:
+                arr[k] = left_arr[i]
+                i += 1
+            else:
+                arr[k] = right_arr[j]
+                j += 1
+            k += 1
 
-    merge_sort(numbers_list, left, mid)
-    merge_sort(numbers_list, mid + 1, right)
+        while i < len(left_arr):
+            arr[k] = left_arr[i]
+            i += 1
+            k += 1
 
-    merge(numbers_list, left, right, mid)
+        while j < len(right_arr):
+            arr[k] = right_arr[j]
+            j += 1
+            k += 1
 
 
-def merge(numbers_list, left, right, mid):
+test_arr = list(range(10000, 0, -1))
 
-    left_cpy = numbers_list[left:mid + 1]
-    right_cpy = numbers_list[mid + 1:right]
+start_time = time.perf_counter()
 
-    l_counter, r_counter = 0, 0
-    sorted_counter = left
+merge_sort(test_arr)
 
-    while l_counter < len(left_cpy) and r_counter < len(right_cpy):
-        if left_cpy[l_counter] <= right_cpy[r_counter]:
-            numbers_list[sorted_counter] = left_cpy[l_counter]
-            l_counter += 1
-        else:
-            numbers_list[sorted_counter] = right_cpy[r_counter]
-            r_counter += 1
+end_time = time.perf_counter()
 
-        sorted_counter += 1
+time_taken = end_time - start_time
 
-    while l_counter < len(left_cpy):
-        numbers_list[sorted_counter] = left_cpy[l_counter]
-        l_counter += 1
-        sorted_counter += 1
-
-    while r_counter < len(right_cpy):
-        numbers_list[sorted_counter] = right_cpy[r_counter]
-        r_counter += 1
-        sorted_counter += 1
-
-print("")
-print(numbers)
-print("---------------------------------------")
-input("press enter to start sorting")
-merge_sort(numbers, 0, len(numbers) - 1)
-print("---------------------------------------")
-print(numbers)
+print(test_arr)
+print("----------")
+print("time taken:", time_taken)
