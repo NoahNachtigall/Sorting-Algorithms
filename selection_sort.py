@@ -11,7 +11,10 @@ pygame.init()
 pygame.mixer.init(frequency=44100, size=-16, channels=2)
 
 # -------------------- WINDOW --------------------
-window = pygame.display.set_mode((800, 600))
+SCREEN_WIDTH = 800
+SCREEN_HEIGHT = 600
+
+window = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Selection Sort Visualization")
 
 clock = pygame.time.Clock()
@@ -23,9 +26,19 @@ RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 
+# -------------------- SETTINGS --------------------
+ARRAY_SIZE = 100
+
+BAR_WIDTH = SCREEN_WIDTH / ARRAY_SIZE
+HEIGHT_MULTIPLIER = SCREEN_HEIGHT / ARRAY_SIZE
+
 # -------------------- ARRAY --------------------
-nums = list(range(50))
-random.shuffle(nums)
+def generate_array():
+    nums = list(range(1, ARRAY_SIZE + 1))
+    random.shuffle(nums)
+    return nums
+
+nums = generate_array()
 
 # -------------------- SORT VARIABLES --------------------
 index = 0
@@ -71,8 +84,7 @@ def reset():
     global done
     global sorting
 
-    nums = list(range(50))
-    random.shuffle(nums)
+    nums = generate_array()
 
     index = 0
     min_pos = index
@@ -98,12 +110,17 @@ def finish_animation():
             pygame.draw.rect(
                 window,
                 color,
-                (x * 16, 600 - nums[x] * 6, 15, nums[x] * 6)
+                (
+                    x * BAR_WIDTH,
+                    SCREEN_HEIGHT - nums[x] * HEIGHT_MULTIPLIER,
+                    BAR_WIDTH,
+                    nums[x] * HEIGHT_MULTIPLIER
+                )
             )
 
         pygame.display.flip()
 
-        pygame.time.delay(20)
+        pygame.time.delay(10)
 
 # -------------------- DRAW --------------------
 def draw():
@@ -128,7 +145,12 @@ def draw():
         pygame.draw.rect(
             window,
             color,
-            (i * 16, 600 - nums[i] * 6, 15, nums[i] * 6)
+            (
+                i * BAR_WIDTH,
+                SCREEN_HEIGHT - nums[i] * HEIGHT_MULTIPLIER,
+                BAR_WIDTH,
+                nums[i] * HEIGHT_MULTIPLIER
+            )
         )
 
 # -------------------- MAIN LOOP --------------------
@@ -146,10 +168,10 @@ while running:
 
         if event.type == pygame.KEYDOWN:
 
-            # START
+            # START SORTING
             if event.key == pygame.K_SPACE and not sorting and not done:
 
-                start = time.time()
+                start = time.perf_counter()
                 sorting = True
 
             # RESET
@@ -170,7 +192,7 @@ while running:
 
                 min_pos = j
 
-                # lower "found new minimum" sound
+                # lower "new minimum" sound
                 play_tone(150 + nums[min_pos] * 6)
 
             j += 1
@@ -187,16 +209,16 @@ while running:
             min_pos = index
             j = index + 1
 
-        # finished
+        # FINISHED
         if index >= len(nums) - 1:
 
             sorting = False
             done = True
 
-            end_time = time.time()
+            end = time.perf_counter()
 
             print(nums)
-            print(f"Sorting time: {end_time - start} seconds")
+            print(f"Sorting time: {end - start:.6f} seconds")
 
             finish_animation()
 

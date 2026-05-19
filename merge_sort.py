@@ -7,7 +7,7 @@ import random
 import time
 
 # -------------------- SETTINGS --------------------        change the settings to your use
-WIDTH = 1200
+WIDTH = 1400
 HEIGHT = 700
 BAR_WIDTH = 10
 ARRAY_SIZE = WIDTH // BAR_WIDTH
@@ -196,6 +196,8 @@ while running:
                 end_time = time.perf_counter()
 
                 print("Time Taken:", end_time - start_time)
+
+                finish_animation(arr)
 
             if event.key == pygame.K_r:
 

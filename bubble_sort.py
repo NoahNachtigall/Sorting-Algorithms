@@ -10,25 +10,41 @@ import numpy as np
 pygame.init()
 pygame.mixer.init(frequency=44100, size=-16, channels=2)
 
-window = pygame.display.set_mode((800, 600))
-pygame.display.set_caption("Pygame Bubble Sort Visualization")
+# -------------------- WINDOW --------------------
+SCREEN_WIDTH = 800
+SCREEN_HEIGHT = 600
+
+window = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+pygame.display.set_caption("Bubble Sort Visualization")
 
 clock = pygame.time.Clock()
 
-# -------------------- ARRAY --------------------
-nums = list(range(50))
-random.shuffle(nums)
+# -------------------- SETTINGS --------------------
+ARRAY_SIZE = 100
 
-sorting = False
-index = len(nums) - 1
-j = 0
-done = False
+BAR_WIDTH = SCREEN_WIDTH / ARRAY_SIZE
+HEIGHT_MULTIPLIER = SCREEN_HEIGHT / ARRAY_SIZE
 
 # -------------------- COLORS --------------------
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
+
+# -------------------- ARRAY --------------------
+def generate_array():
+    nums = list(range(1, ARRAY_SIZE + 1))
+    random.shuffle(nums)
+    return nums
+
+nums = generate_array()
+
+# -------------------- SORT VARIABLES --------------------
+sorting = False
+done = False
+
+index = len(nums) - 1
+j = 0
 
 # -------------------- SOUND --------------------
 def play_tone(frequency, duration=0.015, volume=0.08):
@@ -55,6 +71,23 @@ def play_tone(frequency, duration=0.015, volume=0.08):
 
     sound.play()
 
+# -------------------- RESET --------------------
+def reset():
+
+    global nums
+    global sorting
+    global done
+    global index
+    global j
+
+    nums = generate_array()
+
+    sorting = False
+    done = False
+
+    index = len(nums) - 1
+    j = 0
+
 # -------------------- FINISH ANIMATION --------------------
 def finish_animation():
 
@@ -72,12 +105,17 @@ def finish_animation():
             pygame.draw.rect(
                 window,
                 color,
-                (x * 16, 600 - nums[x] * 6, 15, nums[x] * 6)
+                (
+                    x * BAR_WIDTH,
+                    SCREEN_HEIGHT - nums[x] * HEIGHT_MULTIPLIER,
+                    BAR_WIDTH,
+                    nums[x] * HEIGHT_MULTIPLIER
+                )
             )
 
         pygame.display.flip()
 
-        pygame.time.delay(20)
+        pygame.time.delay(10)
 
 # -------------------- MAIN LOOP --------------------
 running = True
@@ -97,20 +135,13 @@ while running:
             # START SORT
             if event.key == pygame.K_SPACE and not sorting and not done:
 
-                start = time.time()
+                start = time.perf_counter()
                 sorting = True
 
             # RESET
             if event.key == pygame.K_r:
 
-                nums = list(range(50))
-                random.shuffle(nums)
-
-                sorting = False
-                done = False
-
-                index = len(nums) - 1
-                j = 0
+                reset()
 
     # -------------------- DRAW BACKGROUND --------------------
     window.fill(BLACK)
@@ -118,13 +149,15 @@ while running:
     # -------------------- SORTING --------------------
     if sorting:
 
-        # play comparison tone
+        # comparison tone
         freq = 200 + nums[j] * 8
         play_tone(freq)
 
         if nums[j] > nums[j + 1]:
 
-            # swap
+            # swap sound
+            play_tone(300 + nums[j] * 8)
+
             nums[j], nums[j + 1] = nums[j + 1], nums[j]
 
         j += 1
@@ -141,10 +174,10 @@ while running:
             sorting = False
             done = True
 
-            end_time = time.time()
+            end = time.perf_counter()
 
             print(nums)
-            print(f"Sorting time: {end_time - start} seconds")
+            print(f"Sorting time: {end - start:.6f} seconds")
 
             finish_animation()
 
@@ -166,7 +199,12 @@ while running:
         pygame.draw.rect(
             window,
             color,
-            (i * 16, 600 - nums[i] * 6, 15, nums[i] * 6)
+            (
+                i * BAR_WIDTH,
+                SCREEN_HEIGHT - nums[i] * HEIGHT_MULTIPLIER,
+                BAR_WIDTH,
+                nums[i] * HEIGHT_MULTIPLIER
+            )
         )
 
     pygame.display.flip()
