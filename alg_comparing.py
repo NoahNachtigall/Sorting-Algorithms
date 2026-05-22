@@ -191,6 +191,7 @@ print(f"Selection Sort:  {selection_time:.6f} seconds", f"({selection_comparison
 print(f"Merge Sort:      {merge_time:.6f} seconds", f"({merge_comparisons} comparisons)")
 print(f"Quick Sort:      {quick_time:.6f} seconds", f"({quick_comparisons} comparisons)")
 print(f"Insertion Sort:  {insertion_time:.6f} seconds", f"({insertion_comparisons} comparisons)")
+print("Bogo Sort: Didn't even try")
 
 print("\n=======================================\n")
 

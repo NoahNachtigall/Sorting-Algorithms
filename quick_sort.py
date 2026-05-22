@@ -5,7 +5,7 @@ import random
 import time
 
 # -------------------- SETTINGS --------------------        change the settings to your use
-WIDTH = 1200
+WIDTH = 1400
 HEIGHT = 700
 BAR_WIDTH = 5
 ARRAY_SIZE = WIDTH // BAR_WIDTH
