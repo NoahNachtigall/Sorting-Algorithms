@@ -1,6 +1,4 @@
-# a Merge-Sort visualisation using the PYGAME libary
-# pip install pygame before running
-
+#Visualisation of Quick Sort Algorithm using pygame'
 import numpy as np
 import pygame
 import random
@@ -25,7 +23,7 @@ FPS = 120
 pygame.init()
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Merge Sort Visualization")
+pygame.display.set_caption("Quick Sort Visualization")
 
 clock = pygame.time.Clock()
 
@@ -81,97 +79,50 @@ def draw_array(arr, left=None, right=None, merged=None, sorted_index=None):
     pygame.display.update()
 
 
-# -------------------- MERGE SORT --------------------
-def merge_sort(arr, start, end):
-    if end - start <= 1:
-        return
-
-    mid = (start + end) // 2
-
-    merge_sort(arr, start, mid)                 #left arr
-    merge_sort(arr, mid, end)                   #right arr
-
-    merge(arr, start, mid, end)                 #sorted arr
+# -------------------- EVENT HANDLING --------------------
+def handle_events():
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            exit()
 
 
-def merge(arr, start, mid, end):                #helper function
-    left = arr[start:mid]
-    right = arr[mid:end]
+# -------------------- QUICK SORT --------------------
+def partition(arr, low, high):
+    pivot = arr[high]
+    i = low - 1
 
-    i = 0
-    j = 0
-    k = start
-
-    while i < len(left) and j < len(right):             #compare left arr and right arr
-
-        freq = 200 + arr[k]
-        play_tone(freq)
-
-        # draw current state
-        draw_array(
-            arr,
-            left=(start, mid - 1),
-            right=(mid, end - 1),
-            merged=(start, k)
-        )
-
-        pygame.time.delay(5)
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                exit()
-
-        if left[i] < right[j]:
-            arr[k] = left[i]
+    for j in range(low, high):
+        handle_events()
+        if arr[j] < pivot:
             i += 1
-        else:
-            arr[k] = right[j]
-            j += 1
+            arr[i], arr[j] = arr[j], arr[i]
+            play_tone(200 + arr[i])
+            draw_array(arr, left=(low, i), right=(j, high))
+            pygame.time.delay(10)
 
-        k += 1
+    arr[i + 1], arr[high] = arr[high], arr[i + 1]
+    play_tone(200 + arr[i + 1])
+    draw_array(arr, left=(low, i + 1), right=(high, high))
+    pygame.time.delay(10)
 
-    while i < len(left):                               #if left arr still has elements but right arr not then just add all left elements
-        arr[k] = left[i]
-        i += 1
-        k += 1
+    return i + 1
 
-        draw_array(
-            arr,
-            left=(start, mid - 1),
-            merged=(start, k)
-        )
 
-        pygame.time.delay(5)
+def QuickSort(arr, low, high):
+    if low < high:
+        pi = partition(arr, low, high)
+        QuickSort(arr, low, pi - 1)
+        QuickSort(arr, pi + 1, high)
 
-    while j < len(right):                               #if right arr still has elements but left arr not then just add all left elements
-        arr[k] = right[j]
-        j += 1
-        k += 1
-
-        draw_array(
-            arr,
-            right=(mid, end - 1),
-            merged=(start, k)
-        )
-
-        pygame.time.delay(5)
 
 def finish_animation(arr):
-
     for i in range(len(arr)):
-
+        handle_events()
         freq = 200 + arr[i]
         play_tone(freq)
-
         draw_array(arr, sorted_index=i)
-
         pygame.time.delay(10)
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                exit()
 
 # -------------------- MAIN LOOP --------------------
 running = True
@@ -191,11 +142,13 @@ while running:
 
                 start_time = time.perf_counter()
 
-                merge_sort(arr, 0, len(arr))
+                QuickSort(arr, 0, len(arr) - 1)
+                finish_animation(arr)
 
                 end_time = time.perf_counter()
-
                 print("Time Taken:", end_time - start_time)
+
+                sorting = False
 
             if event.key == pygame.K_r:
 
