@@ -7,6 +7,7 @@ selection_comparisons = 0
 merge_comparisons = 0
 quick_comparisons = 0
 insertion_comparisons = 0
+radix_comparisons = 0
 
 
 # ------------------------
@@ -142,6 +143,48 @@ def insertion_sort(arr):
 
         arr[j + 1] = key
 
+# Radix Sort
+def radix_sort(arr):
+    global radix_comparisons
+    if not arr:
+        return
+    
+    max_num = max(arr)
+    exp = 1
+    
+    while max_num / exp > 1:
+        counting_sort_radix(arr, exp)
+        exp *= 10
+
+
+def counting_sort_radix(arr, exp):
+    global radix_comparisons
+    n = len(arr)
+    output = [0] * n
+    count = [0] * 10
+
+    # Count occurrences of each digit in the exp position
+    for i in range(n):
+        index = (arr[i] // exp) % 10
+        count[index] += 1
+        radix_comparisons += 1
+
+    # Update the count array to hold the cumulative count
+    for i in range(1, 10):
+        count[i] += count[i - 1]
+
+    # Build the output array
+    for i in range(n - 1, -1, -1):
+        index = (arr[i] // exp) % 10
+        output[count[index] - 1] = arr[i]
+        count[index] -= 1
+        radix_comparisons += 1
+
+    # Copy the output array back to arr
+    for i in range(n):
+        arr[i] = output[i]
+
+
 # ------------------------
 # Benchmark Function
 # ------------------------
@@ -178,6 +221,7 @@ selection_time = benchmark(selection_sort, test_arr)
 merge_time = benchmark(merge_sort, test_arr)
 quick_time = benchmark(quick_sort, test_arr)
 insertion_time = benchmark(insertion_sort, test_arr)
+radix_time = benchmark(radix_sort, test_arr)
 
 # ------------------------
 # RESULTS
@@ -191,7 +235,7 @@ print(f"Selection Sort:  {selection_time:.6f} seconds", f"({selection_comparison
 print(f"Merge Sort:      {merge_time:.6f} seconds", f"({merge_comparisons} comparisons)")
 print(f"Quick Sort:      {quick_time:.6f} seconds", f"({quick_comparisons} comparisons)")
 print(f"Insertion Sort:  {insertion_time:.6f} seconds", f"({insertion_comparisons} comparisons)")
-print("Bogo Sort: Didn't even try")
+print(f"Radix Sort:      {radix_time:.6f} seconds", f"({radix_comparisons} comparisons)")
 
 print("\n=======================================\n")
 
@@ -204,7 +248,8 @@ times = {
     "Selection Sort": selection_time,
     "Merge Sort": merge_time,
     "Quick Sort": quick_time,
-    "Insertion Sort": insertion_time
+    "Insertion Sort": insertion_time,
+    "Radix Sort": radix_time
 }
 
 winner = min(times, key=times.get)
