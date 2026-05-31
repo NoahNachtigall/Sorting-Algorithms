@@ -1,12 +1,12 @@
-# Radix Sort Visualization with Dynamic Sounds
-# pip install pygame numpy
+# a Radix-Sort visualisation using the PYGAME libary
+# pip install pygame before running
 
-import pygame
-import time
-import random
 import numpy as np
+import pygame
+import random
+import time
 
-# -------------------- SETTINGS --------------------
+# -------------------- SETTINGS --------------------        change the settings to your use
 WIDTH = 1400
 HEIGHT = 700
 BAR_WIDTH = 5
@@ -16,7 +16,6 @@ BACKGROUND_COLOR = (20, 20, 20)
 BAR_COLOR = (100, 200, 255)
 COUNTING_COLOR = (255, 150, 100)
 SORTED_COLOR = (0, 255, 0)
-BUCKET_COLOR = (150, 150, 255)
 
 FPS = 120
 
@@ -54,7 +53,7 @@ def play_tone(frequency, duration=0.02, volume=0.1):
     sound.play()
 
 # -------------------- DRAW FUNCTION --------------------
-def draw_array(arr, digit_pos=None, sorted_indices=None):
+def draw_array(arr, counting_indices=None, sorted_index=None):
     screen.fill(BACKGROUND_COLOR)
 
     for i, value in enumerate(arr):
@@ -63,12 +62,11 @@ def draw_array(arr, digit_pos=None, sorted_indices=None):
 
         color = BAR_COLOR
 
-        if sorted_indices is not None and i in sorted_indices:
-            color = SORTED_COLOR
+        if counting_indices and i in counting_indices:
+            color = COUNTING_COLOR
 
-        if digit_pos is not None:
-            digit = (value // (10 ** digit_pos)) % 10
-            color = tuple(min(255, 100 + digit * 20) for _ in range(3))
+        if sorted_index is not None and i <= sorted_index:
+            color = SORTED_COLOR
 
         pygame.draw.rect(screen, color, (x, y, BAR_WIDTH, value))
 
@@ -82,76 +80,82 @@ def radix_sort(arr):
     
     max_num = max(arr)
     exp = 1
-    digit_pos = 0
     
     while max_num / exp > 1:
-        counting_sort(arr, exp, digit_pos)
+        counting_sort(arr, exp)
         exp *= 10
-        digit_pos += 1
-        
-        # Draw final state for this digit
-        draw_array(arr, digit_pos=None)
-        time.sleep(0.1)
 
 
-def counting_sort(arr, exp, digit_pos):
+def counting_sort(arr, exp):                #helper function
     n = len(arr)
     output = [0] * n
     count = [0] * 10
 
-    # Count occurrences
+    # Count occurrences of each digit in the exp position
     for i in range(n):
         index = (arr[i] // exp) % 10
         count[index] += 1
         
-        # Visualize counting
-        draw_array(arr, digit_pos=digit_pos)
-        play_tone(200 + index * 50, duration=0.01)
+        freq = 200 + index * 100
+        play_tone(freq, duration=0.01)
         
-        # Check for quit event
+        draw_array(arr, counting_indices={i})
+        
+        pygame.time.delay(1)
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                return
+                pygame.quit()
+                exit()
 
-    # Update count array
+    # Update the count array to hold the cumulative count
     for i in range(1, 10):
         count[i] += count[i - 1]
 
-    # Build output array
+    # Build the output array
     for i in range(n - 1, -1, -1):
         index = (arr[i] // exp) % 10
         output[count[index] - 1] = arr[i]
         count[index] -= 1
         
-        # Visualize building
-        draw_array(arr, digit_pos=digit_pos)
-        play_tone(400 + arr[i], duration=0.01, volume=0.05)
+        freq = 400 + arr[i]
+        play_tone(freq, duration=0.01, volume=0.05)
         
+        draw_array(arr, counting_indices={i})
+        
+        pygame.time.delay(1)
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                return
+                pygame.quit()
+                exit()
 
-    # Copy back to arr
+    # Copy the output array back to arr, so that arr now contains sorted numbers
     for i in range(n):
         arr[i] = output[i]
+        
+        draw_array(arr)
+        
+        pygame.time.delay(2)
 
 
 # -------------------- MAIN --------------------
 def main():
     sorting = True
-    sorted_indices = set()
 
     while sorting:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sorting = False
 
-        # Start sorting
         radix_sort(arr)
         
-        # Mark all as sorted
-        sorted_indices = set(range(len(arr)))
-        draw_array(arr, digit_pos=None, sorted_indices=sorted_indices)
+        # Final sorted display
+        for i in range(len(arr)):
+            draw_array(arr, sorted_index=i)
+            freq = 200 + arr[i]
+            play_tone(freq)
+            pygame.time.delay(10)
         
         time.sleep(2)
         sorting = False
